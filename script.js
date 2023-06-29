@@ -4,14 +4,14 @@ var phoneError =document.getElementById('telname');
 var phoneErr=document.getElementById('phone-err');
 var emailError =document.getElementById('cemail');
 var emailErr =document.getElementById('email-err');
-var passError =document.getElementById('pass');
-var passErr =document.getElementById('pass-err');
+// var passError =document.getElementById('pass');
+// var passErr =document.getElementById('pass-err');
 var submitError =document.getElementById('sub');
 var subErr =document.getElementById('form-err');
 
 
 
-var regx = /^([A-Za-z0-9\-#_.]+)@([A-Za-z0-9\-]+).([a-z]{2,3}).([a-z]{2,3})?$/
+var regx = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 
 function validateFullname(){
     if(nameError.value.trim()==""){
@@ -29,21 +29,36 @@ function validateFullname(){
 }
 
 function validatePhoneno(){
+    var cleanedPhoneNumber = phoneError.value.replace(/[^\d]/g, '');
+    // console.log(`${phoneError.value} hi`);
+    // console.log(`${cleanedPhoneNumber}`);
     if(phoneError.value.trim()==""){
         phoneErr.innerText="Phone no is required";
-        return false
+        return false;
     }
-    else if(phoneError.length !== 10){
-        phoneErr.innerText="10 digits required";
-        return false
-    }
-    else if(!phoneError.match(/^[0-9]{10}$/)){
+   
+    else if(!/^[\d.\-\/\s]+$/.test(phoneError.value)){
         phoneErr.innerText="Only digits please";
-        return false
+        return false;
     }
+    
+    
+    
+    else if(cleanedPhoneNumber.length !== 10){
+        // console.log(`${cleanedPhoneNumber.length}`)
+        phoneErr.innerText="10 digits required";
+        return false;
+    }
+    else if (!/^(\d{3}[-.\s]?){2}\d{4}$/.test(phoneError.value)) {
+        // console.log("hi");
+        phoneErr.innerText = "Invalid phone number format";
+        return false;
+    }
+
+    
     else{
-        phoneErr.innerText=''
-        return true
+        phoneErr.innerText='';
+        return true;
     }
 }
 
@@ -63,23 +78,41 @@ function validateEmail(){
 } 
 }
 
-function validatePass(){
-    if(passError.value.trim()==''){
-        passErr.innerText="password required";
-        return false
+function validatePass() {
+    var passwordInput = document.getElementById("pass");
+    var passErr = document.getElementById("pass-err");
+  
+    var password = passwordInput.value;
+    var validationResult = validatePassword(password);
+      
+    passErr.innerText = validationResult.strength;
+    passErr.style.color = validationResult.color;
+    return passErr;
+  }
+  
+  function validatePassword(password) {
+    var passwordStrength = "";
+    var passwordColor = "";
+  
+    if (password.length < 8) {
+      passwordStrength = "minimum 8 characters";
+      passwordColor = "red";
+    } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
+      passwordStrength = "Medium";
+      passwordColor = "orange";
+    } else {
+      passwordStrength = "Strong";
+      passwordColor = "green";
     }
-    else if(passError.value.length <8){
-        passErr.innerText="Password should be more than 8 character";
-        return false
-    }
-     else{
-        passErr.innerText='';
-        return true
-    }
-}
+  
+    return { strength: passwordStrength, color: passwordColor };
+  }
+  
 
 function verify(){
-    if(!validateFullname() || !validatePhoneno() || !validateEmail() || !validatePass()){
+    var passCheck = validatePass();
+    if(!validateFullname() || !validatePhoneno() || !validateEmail() || passCheck.innerText != "Strong"){
+        console.log(`${passCheck.innerText}`)
         subErr.style.display='block';
         subErr.innerText="please fix error to submit";
         setTimeout(function(){subErr.style.display= 'none';}, 3000);
